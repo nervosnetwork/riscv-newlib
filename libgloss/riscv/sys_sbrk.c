@@ -25,6 +25,36 @@ _sbrk (nbytes)
 
 #else
 
+#ifdef CKB_NO_MMU
+
+#include <sys/types.h>
+/*
+ * For simplicity, we are allocating 1MB - 3MB memory range as the
+ * memory space for brk. This preserves 1MB for code size, and 1MB for
+ * stack size. Notice the parameters here are tunable, so a script with
+ * special requirements can still adjust the values as they want.
+ * Since ckb-vm doesn't have MMU, we don't need to make real syscalls.
+ */
+#ifndef CKB_BRK_MIN
+#define CKB_BRK_MIN 0x00100000
+#endif  /* CKB_BRK_MIN */
+#ifndef CKB_BRK_MAX
+#define CKB_BRK_MAX 0x00300000
+#endif  /* CKB_BRK_MAX */
+
+void*
+_sbrk(ptrdiff_t incr)
+{
+  static uintptr_t p = CKB_BRK_MIN;
+  uintptr_t start = p;
+  p += incr;
+  if (p > CKB_BRK_MAX) {
+    return (void *) (-1);
+  }
+  return start;
+}
+
+#else
 // QEMU uses a syscall.
 #include <machine/syscall.h>
 #include <sys/types.h>
@@ -53,4 +83,5 @@ _sbrk(ptrdiff_t incr)
   heap_end += incr;
   return (void *)(heap_end - incr);
 }
-#endif
+#endif  /* CKB_NO_MMU */
+#endif  /* USING_SIM_SPECS */
