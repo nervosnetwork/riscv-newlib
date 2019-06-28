@@ -29,14 +29,15 @@ _sbrk (nbytes)
 
 #include <sys/types.h>
 /*
- * For simplicity, we are allocating 1MB - 3MB memory range as the
- * memory space for brk. This preserves 1MB for code size, and 1MB for
- * stack size. Notice the parameters here are tunable, so a script with
- * special requirements can still adjust the values as they want.
+ * For simplicity, we are allocating the memory range from BSS END till 3MB
+ * as the memory space for brk. This preserves just enough for code space,
+ * and 1MB for stack space. Notice the parameters here are tunable, so a script
+ * with special requirements can still adjust the values as they want.
  * Since ckb-vm doesn't have MMU, we don't need to make real syscalls.
  */
 #ifndef CKB_BRK_MIN
-#define CKB_BRK_MIN 0x00100000
+extern char _end[]; /* _end is set in the linker */
+#define CKB_BRK_MIN ((uintptr_t) &_end)
 #endif  /* CKB_BRK_MIN */
 #ifndef CKB_BRK_MAX
 #define CKB_BRK_MAX 0x00300000
