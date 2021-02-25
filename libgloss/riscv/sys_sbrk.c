@@ -50,7 +50,7 @@ _sbrk(ptrdiff_t incr)
   uintptr_t start = p;
   p += incr;
   if (p > CKB_BRK_MAX) {
-    return (void *) (-1);
+    return (void *)__syscall_error (-ENOMEM);
   }
   return start;
 }
