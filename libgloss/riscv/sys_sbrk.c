@@ -28,6 +28,7 @@ _sbrk (nbytes)
 #ifdef CKB_NO_MMU
 
 #include <sys/types.h>
+#include <errno.h>
 /*
  * For simplicity, we are allocating the memory range from BSS END till 3MB
  * as the memory space for brk. This preserves just enough for code space,
